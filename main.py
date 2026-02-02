@@ -28,10 +28,14 @@ from auth_db import (
 
 settings = get_settings()
 
-# Initialize auth DB with safe migrations; seed only if allowed
-ensure_db_initialized(seed=settings.seed_dev_key)
-
 app = FastAPI(title="GoodRx Coupons API", version="0.2.0")
+
+@app.on_event("startup")
+def startup():
+    try:
+        ensure_db_initialized(seed=settings.seed_dev_key)
+    except Exception as e:
+        logger.exception("DB init failed: %s", e)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("goodrx_api")
