@@ -309,32 +309,4 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 
-# Debug endpoint to confirm header reading — enabled only in dev
-@app.get("/whoami", response_model=Envelope)
-def whoami(request: Request, _keyinfo: dict = Security(require_api_key)):
-    # Do not return the full API key. Show masked last 4 and client info.
-    api_key = getattr(request.state, "api_key", None)
-    last4 = api_key[-4:] if api_key else None
-    data = {
-        "api_key_last4": last4,
-        "client_name": getattr(request.state, "client_name", None),
-        "rate_limit": getattr(request.state, "rate_limit", None),
-        "is_active": True,
-    }
-    return ok(_rid(request), data=data)
-
-
-# Dev-only header debug endpoint to help diagnose Swagger Authorize issues
-@app.get("/_debug/header", response_model=Envelope)
-def debug_header(request: Request):
-    if settings.env != "dev":
-        raise HTTPException(status_code=404, detail="Not found")
-    # Starlette headers are case-insensitive; use get()
-    api_key = request.headers.get("x-api-key") or request.headers.get("X-API-KEY")
-    admin_key = request.headers.get("x-admin-key") or request.headers.get("X-ADMIN-KEY")
-    def mask(k: str | None):
-        if not k:
-            return None
-        return ("*" * max(0, len(k) - 4)) + k[-4:]
-    data = {"api_key_present": bool(api_key), "api_key_last4": mask(api_key), "admin_key_present": bool(admin_key), "admin_key_last4": mask(admin_key)}
-    return ok(_rid(request), data=data)
+# NOTE: Removed developer-only /whoami and /_debug/header endpoints as requested.
