@@ -6,6 +6,9 @@ redis>=4.5.0
 httpx>=0.24.0
 pydantic>=1.10.7
 typing-extensions>=4.5.0
+# Postgres driver for production (binary wheel)
+psycopg2-binary>=2.9.7,<3.0.0
+# Webserver
 gunicorn>=20.1.0,<21.0.0
 
 # Testing / QA
