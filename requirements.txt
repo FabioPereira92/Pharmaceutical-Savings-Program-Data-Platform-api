@@ -1,0 +1,19 @@
+fastapi>=0.95.0,<1.0.0
+uvicorn[standard]>=0.21.0,<1.0.0
+python-dotenv>=1.0.0
+openai>=1.0.0
+selenium>=4.8.0
+openpyxl>=3.0.10
+redis>=4.5.0
+httpx>=0.24.0
+requests>=2.31.0
+pytest>=7.3.0
+pytest-asyncio>=0.21.0
+typing-extensions>=4.5.0
+pydantic>=1.10.7
+pytest-cov>=3.0.0
+coverage>=7.2.0
+
+# Optional / dev
+black>=23.9.1
+isort>=5.12.0
