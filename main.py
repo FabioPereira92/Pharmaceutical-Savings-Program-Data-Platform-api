@@ -28,7 +28,7 @@ from auth_db import (
 
 settings = get_settings()
 
-app = FastAPI(title="GoodRx Coupons API", version="0.2.0")
+app = FastAPI(title="Copay programs API", version="0.2.0")
 
 @app.on_event("startup")
 def startup():
