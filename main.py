@@ -25,10 +25,21 @@ from auth_db import (
     set_key_active,
     rotate_key,
 )
+from pydantic import BaseModel
 
 settings = get_settings()
 
 app = FastAPI(title="Copay programs API", version="0.2.0")
+
+class Location(BaseModel):
+    zip: str
+    state: str
+
+class CouponRequest(BaseModel):
+    drug: str
+    strength: str
+    quantity: int
+    location: Location
 
 @app.on_event("startup")
 def startup():
@@ -223,9 +234,20 @@ def metrics_endpoint(request: Request):
     return ok(_rid(request), data=snapshot())
 
 
-@app.get("/coupon", response_model=Envelope)
-def read_coupon(drug_name: str, request: Request, _keyinfo: dict = Security(require_api_key)):
-    row = get_coupon_by_drug(drug_name)
+@app.post("/coupon", response_model=Envelope)
+def read_coupon(request_body: CouponRequest, request: Request, _keyinfo: dict = Security(require_api_key)):
+    """
+    Accepts JSON like:
+    {
+  "drug": "Ozempic",
+  "strength": "1mg",
+  "quantity": 4,
+  "location": {
+    "zip": "94107",
+    "state": "CA"
+  }
+    """
+    row = get_coupon_by_drug(request_body.drug)
     if not row:
         env = fail(_rid(request), 404, "Coupon not found", "not_found")
         return JSONResponse(status_code=404, content=env.model_dump())
