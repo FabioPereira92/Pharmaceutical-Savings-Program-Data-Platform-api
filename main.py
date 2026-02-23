@@ -31,15 +31,16 @@ settings = get_settings()
 
 app = FastAPI(title="Copay programs API", version="0.2.0")
 
-class Location(BaseModel):
-    zip: str
-    state: str
-
 class CouponRequest(BaseModel):
     drug: str
+    insurance_type: str
+    coverage_status: str
+    state: str
+    days_supply: int
+    quantity: int
+    uom: str
     strength: str
     quantity: int
-    location: Location
 
 @app.on_event("startup")
 def startup():
@@ -234,22 +235,11 @@ def metrics_endpoint(request: Request):
     return ok(_rid(request), data=snapshot())
 
 
-@app.post("/coupon", response_model=Envelope)
-def read_coupon(request_body: CouponRequest, request: Request, _keyinfo: dict = Security(require_api_key)):
-    """
-    Accepts JSON like:
-    {
-  "drug": "Ozempic",
-  "strength": "1mg",
-  "quantity": 4,
-  "location": {
-    "zip": "94107",
-    "state": "CA"
-  }
-    """
+@app.post("/v1/drug-affordability", response_model=Envelope)
+def read_drug_affordability(request_body: CouponRequest, request: Request, _keyinfo: dict = Security(require_api_key)):
     row = get_coupon_by_drug(request_body.drug)
     if not row:
-        env = fail(_rid(request), 404, "Coupon not found", "not_found")
+        env = fail(_rid(request), 404, "Drug affordability not found", "not_found")
         return JSONResponse(status_code=404, content=env.model_dump())
     # expose only ai_extraction (and id) to callers
     data = {"id": row.get("id"), "ai_extraction": row.get("ai_extraction")}
@@ -257,7 +247,7 @@ def read_coupon(request_body: CouponRequest, request: Request, _keyinfo: dict = 
 
 
 @app.get("/coupons", response_model=Envelope)
-def list_coupons_endpoint(
+def list_drugs_affordability_endpoint(
     request: Request,
     page: int = 1,
     per_page: int = 50,
